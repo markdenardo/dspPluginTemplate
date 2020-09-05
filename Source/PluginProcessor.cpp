@@ -157,7 +157,12 @@ void PluginTemplateAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     {
         auto* channelData = buffer.getWritePointer (channel);
 
-        ignoreUnused(channelData);
+//        ignoreUnused(channelData);
+        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        {
+            //iterate hard clipper values
+            channelData[sample] = jlimit(-1.0f, 1.0f, channelData[sample]);
+        }
     }
 }
 

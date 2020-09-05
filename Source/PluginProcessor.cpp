@@ -175,15 +175,16 @@ juce::AudioProcessorEditor* PluginTemplateAudioProcessor::createEditor()
 //==============================================================================
 void PluginTemplateAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    ValueTree copyState = apvts.copyState();
+    std::unique_ptr<XmlElement> xml = copyState.createXml();
+    copyXmlToBinary(*xml.get();, destData);
 }
 
 void PluginTemplateAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    std::unique_ptr<XmlElement> xml = getXmlFromBinary(data, sizeInBytes);
+    ValueTree copyState = ValueTree::fromXml(*xml.get());
+    apvts.replaceState(copyState);
 }
 
 //==============================================================================

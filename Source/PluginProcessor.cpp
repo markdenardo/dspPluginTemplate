@@ -174,7 +174,7 @@ bool PluginTemplateAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* PluginTemplateAudioProcessor::createEditor()
 {
-    return new PluginTemplateAudioProcessorEditor (*this);
+    return new GenericAudioProcessorEditor (*this);
 }
 
 //==============================================================================

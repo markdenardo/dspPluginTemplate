@@ -151,6 +151,8 @@ void PluginTemplateAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
    
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
+    
+    outputVolume.applyGain(buffer, buffer.getNumSamples());
 
     
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -160,8 +162,12 @@ void PluginTemplateAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 //        ignoreUnused(channelData);
         for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
         {
+//            channelData[sample] *=  outputVolume;
+            
             //iterate hard clipper values
             channelData[sample] = jlimit(-1.0f, 1.0f, channelData[sample]);
+            
+            
         }
     }
 }
@@ -215,11 +221,15 @@ void PluginTemplateAudioProcessor::update()
 {
     mustUpdateProcessing = false;
     //Update DSP when a user changes parameters
+    auto volume = apvts.getRawParameterValue("VOL");
+//    outputVolume = Decibels::decibelsToGain(volume->load());
+    outputVolume.setTargetValue( Decibels::decibelsToGain(volume->load()));
 }
 
 void PluginTemplateAudioProcessor::reset()
 {
   //Reset DSP parameters
+    outputVolume.reset(getSampleRate(), 0.50);
 }
 
 //void PluginTemplateAudioProcessor::userChangedParameter()
@@ -241,6 +251,7 @@ AudioProcessorValueTreeState::ParameterLayout PluginTemplateAudioProcessor::crea
     //add them to the vector
     
     parameters.push_back(std::move(gainParam));
+    
  
     return { parameters.begin(), parameters.end() };
 }

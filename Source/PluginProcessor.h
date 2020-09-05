@@ -13,7 +13,8 @@
 //==============================================================================
 /**
 */
-class PluginTemplateAudioProcessor  : public juce::AudioProcessor
+class PluginTemplateAudioProcessor  :   public juce::AudioProcessor,
+                                        public ValueTree::Listener
 {
 public:
     //==============================================================================
@@ -57,12 +58,19 @@ public:
     void prepare(double sampleRate, int samplesPerBlock); //Pass Sample Rate and Buffer Size to DSP
     void update(); //Update DSP when a user changes parameters
     void reset() override; //Reset DSP parameters
-    void userChangedParameter();
+//    void userChangedParameter(); replaced by valueTreePropertyChanged
     
+    AudioProcessorValueTreeState apvts;
+    AudioProcessorValueTreeState::ParameterLayout createParameters();
 
 private:
     bool mustUpdateProcessing { false };
-    bool isActive { false }; 
+    bool isActive { false };
+    
+    void valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged, const Identifier &property) override
+    {
+        mustUpdateProcessing = true;
+    }
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginTemplateAudioProcessor)
 };

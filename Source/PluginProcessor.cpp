@@ -19,9 +19,10 @@ PluginTemplateAudioProcessor::PluginTemplateAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ), apvts(*this, nullptr, "Parameters", createParameters())
 #endif
 {
+    apvts.state.addListener(this);
     init();
 }
 
@@ -215,7 +216,17 @@ void PluginTemplateAudioProcessor::reset()
   //Reset DSP parameters
 }
 
-void PluginTemplateAudioProcessor::userChangedParameter()
+//void PluginTemplateAudioProcessor::userChangedParameter()
+//{
+//    mustUpdateProcessing = true;
+//}
+
+AudioProcessorValueTreeState::ParameterLayout PluginTemplateAudioProcessor::createParameters()
 {
-    mustUpdateProcessing = true;
+    std::vector<std::unique_ptr<RangedAudioParameter>> parameters;
+    
+    //create our parameters
+    //add them to the vector
+    
+    return { parameters.begin(), parameters.end() };
 }

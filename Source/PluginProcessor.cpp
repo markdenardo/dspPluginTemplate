@@ -177,7 +177,7 @@ void PluginTemplateAudioProcessor::getStateInformation (juce::MemoryBlock& destD
 {
     ValueTree copyState = apvts.copyState();
     std::unique_ptr<XmlElement> xml = copyState.createXml();
-    copyXmlToBinary(*xml.get();, destData);
+    copyXmlToBinary(*xml.get(), destData);
 }
 
 void PluginTemplateAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
@@ -225,9 +225,17 @@ void PluginTemplateAudioProcessor::reset()
 AudioProcessorValueTreeState::ParameterLayout PluginTemplateAudioProcessor::createParameters()
 {
     std::vector<std::unique_ptr<RangedAudioParameter>> parameters;
+    //float value returns as a string w a mx length of 4 characters
+    std::function<String(float, int)> valueToTextFunction = [](float x, int l) { return String(x,4);};
+    //value to text function
+    std::function<float(const String&)> textToValueFunction = [](const String& str) {return str.getFloatValue(); };
     
-    //create our parameters
+    
+    //create our parameters for VOL
+    auto gainParam = std::make_unique<AudioParameterFloat >("VOL", "Volume",NormalisableRange<float>(-40.0f, 40.0f),0.0f,"db",AudioProcessorParameter::genericParameter,valueToTextFunction,textToValueFunction );
     //add them to the vector
     
+    parameters.push_back(std::move(gainParam));
+ 
     return { parameters.begin(), parameters.end() };
 }

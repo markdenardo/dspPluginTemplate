@@ -152,12 +152,14 @@ void PluginTemplateAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
-    outputVolume.applyGain(buffer, buffer.getNumSamples());
+//    outputVolume.applyGain(buffer, buffer.getNumSamples());
 
     
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
+            
+        outputVolume[channel].applyGain(channelData,buffer.getNumSamples() );
 
 //        ignoreUnused(channelData);
         for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
@@ -222,14 +224,22 @@ void PluginTemplateAudioProcessor::update()
     mustUpdateProcessing = false;
     //Update DSP when a user changes parameters
     auto volume = apvts.getRawParameterValue("VOL");
-//    outputVolume = Decibels::decibelsToGain(volume->load());
-    outputVolume.setTargetValue( Decibels::decibelsToGain(volume->load()));
+//    outputVolume = Decibels::decibelsToGain(volume->load())
+    
+    for (int channel = 0; channel < 2; ++channel)
+    {
+        outputVolume[channel].setTargetValue( Decibels::decibelsToGain(volume->load()));
+    }
+    
 }
 
 void PluginTemplateAudioProcessor::reset()
 {
   //Reset DSP parameters
-    outputVolume.reset(getSampleRate(), 0.50);
+    for (int channel = 0; channel < 2; ++channel)
+    {
+        outputVolume[channel].reset(getSampleRate(), 0.50);
+    }
 }
 
 //void PluginTemplateAudioProcessor::userChangedParameter()

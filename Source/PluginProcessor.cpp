@@ -263,7 +263,7 @@ AudioProcessorValueTreeState::ParameterLayout PluginTemplateAudioProcessor::crea
     std::function<float(const String&)> textToValueFunction = [](const String& str) {return str.getFloatValue(); };
     
     //Filter
-    parameters.push_back(std::make_unique<AudioParameterFloat >("LPF", "Low Pass Filter", NormalisableRange<float>(20.0f, 20000.0f), 800.0f, "Hz", AudioProcessorParameter::genericParameter, valueToTextFunction, textToValueFunction));
+    parameters.push_back(std::make_unique<AudioParameterFloat >("LPF", "Low Pass Filter", NormalisableRange<float>(20.0f, 20000.0f, 20.0f, 2.0f), 800.0f, "Hz", AudioProcessorParameter::genericParameter, valueToTextFunction, textToValueFunction));
     
     //long way to declare parameter, same application in code
     //create our parameters for VOL

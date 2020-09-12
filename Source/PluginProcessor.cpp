@@ -147,10 +147,12 @@ void PluginTemplateAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
+    auto numSamples = buffer.getNumSamples();
+    
 
    
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+        buffer.clear (i, 0, numSamples);
     
 //    outputVolume.applyGain(buffer, buffer.getNumSamples());
 
@@ -159,10 +161,11 @@ void PluginTemplateAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     {
         auto* channelData = buffer.getWritePointer (channel);
             
-        outputVolume[channel].applyGain(channelData,buffer.getNumSamples() );
+        iirFilter[channel].processSamples(channelData, numSamples);
+        outputVolume[channel].applyGain(channelData,numSamples);
 
 //        ignoreUnused(channelData);
-        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        for (int sample = 0; sample < numSamples; ++sample)
         {
 //            channelData[sample] *=  outputVolume;
             
@@ -223,11 +226,13 @@ void PluginTemplateAudioProcessor::update()
 {
     mustUpdateProcessing = false;
     //Update DSP when a user changes parameters
+    auto frequency = apvts.getRawParameterValue("LPF");
     auto volume = apvts.getRawParameterValue("VOL");
 //    outputVolume = Decibels::decibelsToGain(volume->load())
     
     for (int channel = 0; channel < 2; ++channel)
     {
+        iirFilter[channel].setCoefficients(IIRCoefficients::makeLowPass(getSampleRate(), frequency->load()));
         outputVolume[channel].setTargetValue( Decibels::decibelsToGain(volume->load()));
     }
     
@@ -237,7 +242,9 @@ void PluginTemplateAudioProcessor::reset()
 {
   //Reset DSP parameters
     for (int channel = 0; channel < 2; ++channel)
+        
     {
+        iirFilter[channel].reset();
         outputVolume[channel].reset(getSampleRate(), 0.50);
     }
 }
@@ -255,12 +262,17 @@ AudioProcessorValueTreeState::ParameterLayout PluginTemplateAudioProcessor::crea
     //value to text function
     std::function<float(const String&)> textToValueFunction = [](const String& str) {return str.getFloatValue(); };
     
+    //Filter
+    parameters.push_back(std::make_unique<AudioParameterFloat >("LPF", "Low Pass Filter", NormalisableRange<float>(20.0f, 20000.0f), 800.0f, "Hz", AudioProcessorParameter::genericParameter, valueToTextFunction, textToValueFunction));
     
+    //long way to declare parameter, same application in code
     //create our parameters for VOL
-    auto gainParam = std::make_unique<AudioParameterFloat >("VOL", "Volume",NormalisableRange<float>(-40.0f, 40.0f),0.0f,"db",AudioProcessorParameter::genericParameter,valueToTextFunction,textToValueFunction );
-    //add them to the vector
+    parameters.push_back(std::make_unique<AudioParameterFloat >("VOL", "Volume",NormalisableRange<float>(-40.0f, 40.0f),0.0f,"db",AudioProcessorParameter::genericParameter,valueToTextFunction,textToValueFunction ));
     
-    parameters.push_back(std::move(gainParam));
+//    auto gainParam = ;
+//    //add them to the vector
+    
+//    parameters.push_back(std::move(gainParam));
     
  
     return { parameters.begin(), parameters.end() };

@@ -68,6 +68,7 @@ private:
     bool isActive { false };
 //    float outputVolume = { 0.0 };
     LinearSmoothedValue<float> outputVolume [2] { 0.0 };
+    IIRFilter iirFilter[2];
     
     void valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged, const Identifier &property) override
     {

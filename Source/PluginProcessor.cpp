@@ -185,7 +185,7 @@ bool PluginTemplateAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* PluginTemplateAudioProcessor::createEditor()
 {
-    return new GenericAudioProcessorEditor (*this);
+    return new PluginTemplateAudioProcessorEditor (*this);
 }
 
 //==============================================================================
@@ -257,8 +257,10 @@ void PluginTemplateAudioProcessor::reset()
 AudioProcessorValueTreeState::ParameterLayout PluginTemplateAudioProcessor::createParameters()
 {
     std::vector<std::unique_ptr<RangedAudioParameter>> parameters;
+    
     //float value returns as a string w a mx length of 4 characters
     std::function<String(float, int)> valueToTextFunction = [](float x, int l) { return String(x,4);};
+    
     //value to text function
     std::function<float(const String&)> textToValueFunction = [](const String& str) {return str.getFloatValue(); };
     

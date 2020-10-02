@@ -49,12 +49,19 @@ PluginTemplateAudioProcessorEditor::~PluginTemplateAudioProcessorEditor()
 //==============================================================================
 void PluginTemplateAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-
-    g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
-//    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    
+    auto bounds = getLocalBounds();
+    auto textBounds = bounds.removeFromTop(40);
+    
+    g.setColour (getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+    g.fillRect(bounds);
+    
+    g.setColour(Colours::blueviolet);
+    g.fillRect(textBounds);
+    
+    g.setColour(Colours::white);
+    g.setFont(Font(20.0).italicised().withExtraKerningFactor(0.1f));
+    g.drawFittedText ("DSP Lesson 1", textBounds, Justification::centredLeft, 1);
 }
 
 void PluginTemplateAudioProcessorEditor::resized()

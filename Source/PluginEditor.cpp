@@ -54,11 +54,27 @@ void PluginTemplateAudioProcessorEditor::paint (juce::Graphics& g)
 
     g.setColour (juce::Colours::white);
     g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+//    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
 }
 
 void PluginTemplateAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    auto bounds = getLocalBounds();
+    bounds.removeFromTop(40);
+    bounds.reduce(40, 40);
+    
+    Grid grid;
+    using Track = Grid::TrackInfo;
+    using Fr = Grid::Fr;
+    
+    grid.items.add(GridItem(volumeSlider.get()));
+    grid.items.add(GridItem(lpfSlider.get()));
+    
+    grid.templateColumns = { Track (Fr (1)), Track (Fr (1)), Track (Fr (1)), Track (Fr (1)), Track (Fr (1)) };
+    grid.templateRows = {Track (Fr (1)), Track (Fr (1)) };
+    grid.columnGap = Grid::Px (10);
+    grid.rowGap = Grid::Px (10);
+    
+    grid.performLayout(bounds);
+    
 }

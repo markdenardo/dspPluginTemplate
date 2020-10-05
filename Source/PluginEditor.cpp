@@ -39,11 +39,25 @@ PluginTemplateAudioProcessorEditor::PluginTemplateAudioProcessorEditor (PluginTe
     lpfLabel->attachToComponent(lpfSlider.get(), false);
     lpfLabel->setJustificationType(Justification::centred);
     
+    lookAndFeelButton = std::make_unique<TextButton>("LookAndFeel");
+    addAndMakeVisible(lookAndFeelButton.get());
+    
+    lookAndFeelButton->addListener(this);
+    
+    theLFDark.setColourScheme(LookAndFeel_V4::getDarkColourScheme());
+    theLFMid.setColourScheme(LookAndFeel_V4::getMidnightColourScheme());
+    theLFGrey.setColourScheme(LookAndFeel_V4::getGreyColourScheme());
+    theLFLight.setColourScheme(LookAndFeel_V4::getLightColourScheme());
+    
+    LookAndFeel::setDefaultLookAndFeel(&theLFDark);
+   
+    
     setSize (400, 300);
 }
 
 PluginTemplateAudioProcessorEditor::~PluginTemplateAudioProcessorEditor()
 {
+    LookAndFeel::setDefaultLookAndFeel(nullptr); 
 }
 
 //==============================================================================
@@ -67,8 +81,11 @@ void PluginTemplateAudioProcessorEditor::paint (juce::Graphics& g)
 void PluginTemplateAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds();
-    bounds.removeFromTop(40);
+    auto recTop = bounds.removeFromTop(40);
     bounds.reduce(40, 40);
+    
+    recTop.reduce(10, 0);
+    lookAndFeelButton->setBounds(recTop.removeFromRight(120).withSizeKeepingCentre(120, 24));
     
     Grid grid;
     using Track = Grid::TrackInfo;
@@ -84,4 +101,47 @@ void PluginTemplateAudioProcessorEditor::resized()
     
     grid.performLayout(bounds);
     
+}
+
+void PluginTemplateAudioProcessorEditor::buttonClicked(Button* button)
+{
+    if (button == lookAndFeelButton.get())
+    {
+        PopupMenu m;
+        
+        m.addItem(1,"Dark Look and Feel", true,currentLF==1);
+        m.addItem(2,"Midnight Look and Feel", true,currentLF==2);
+        m.addItem(3,"Grey Look and Feel", true,currentLF==3);
+        m.addItem(4,"Light Look and Feel", true,currentLF==4);
+        
+        m.addSeparator();
+        m.addItem(5,"JUCE 4 Look and Feel", true,currentLF==5);
+        m.addItem(5,"JUCE 3 Look and Feel", true,currentLF==6);
+        
+        auto result = m.showAt(lookAndFeelButton.get());
+        
+        if (result == 1)
+        LookAndFeel::setDefaultLookAndFeel(&theLFDark);
+        
+        else if (result == 2)
+        LookAndFeel::setDefaultLookAndFeel(&theLFMid);
+        
+        else if (result == 3)
+        LookAndFeel::setDefaultLookAndFeel(&theLFGrey);
+        
+        else if (result == 4)
+        LookAndFeel::setDefaultLookAndFeel(&theLFLight);
+        
+        else if (result == 5)
+        LookAndFeel::setDefaultLookAndFeel(&theLFV2);
+        
+        else if (result == 6)
+        LookAndFeel::setDefaultLookAndFeel(&theLFV3);
+            
+        if(result != 0)
+        currentLF = result;
+
+        
+        
+    }
 }

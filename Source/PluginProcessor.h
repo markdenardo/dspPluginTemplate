@@ -62,7 +62,9 @@ public:
     
     AudioProcessorValueTreeState apvts;
     AudioProcessorValueTreeState::ParameterLayout createParameters();
-
+    std::atomic<float> meterLocalMaxVal, meterGlobalMaxVal;
+    
+    
 private:
     bool mustUpdateProcessing { false };
     bool isActive { false };

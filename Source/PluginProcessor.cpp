@@ -148,9 +148,11 @@ void PluginTemplateAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
     auto numSamples = buffer.getNumSamples();
-    
+    auto numChannels = jmin(totalNumInputChannels, totalNumOutputChannels);
 
-   
+    auto sumMaxVal = 0.0f;
+    auto currentmaxVal = meterGlobalMaxVal.load();
+    
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, numSamples);
     
@@ -160,11 +162,32 @@ void PluginTemplateAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
+        auto channelMaxVal = 0.0f;
             
         iirFilter[channel].processSamples(channelData, numSamples);
         outputVolume[channel].applyGain(channelData,numSamples);
-
+        
+        //absolute value of all samples in a buffer
+        //is the current sample larger than our current max?
+            //if yes -- channelaxVal = new max
+        
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            auto rectifiedVal = std::abs(channelData[sample]);
+            
+            if (channelMaxVal < rectifiedVal)
+                channelMaxVal = rectifiedVal;
+            
+            if (currentmaxVal< rectifiedVal)
+                currentmaxVal=rectifiedVal;
+        }
+        
+        sumMaxVal += channelMaxVal;//sum of ch 0 and  ch 1  max vals
+        
+        meterGlobalMaxVal.store(currentmaxVal);
 //        ignoreUnused(channelData);
+        
+        
         for (int sample = 0; sample < numSamples; ++sample)
         {
 //            channelData[sample] *=  outputVolume;
@@ -172,9 +195,10 @@ void PluginTemplateAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
             //iterate hard clipper values
             channelData[sample] = jlimit(-1.0f, 1.0f, channelData[sample]);
             
-            
         }
     }
+    
+    meterLocalMaxVal.store (sumMaxVal/(float)numChannels) ; //numChannels
 }
 
 //==============================================================================
@@ -247,6 +271,9 @@ void PluginTemplateAudioProcessor::reset()
         iirFilter[channel].reset();
         outputVolume[channel].reset(getSampleRate(), 0.50);
     }
+    
+    meterLocalMaxVal.store(0.0f);
+    meterGlobalMaxVal.store(0.0f);
 }
 
 //void PluginTemplateAudioProcessor::userChangedParameter()

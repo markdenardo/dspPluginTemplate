@@ -15,7 +15,8 @@
 /**
 */
 class PluginTemplateAudioProcessorEditor  : public juce::AudioProcessorEditor,
-                                            public Button::Listener
+                                            public Button::Listener,
+                                            public Timer
 {
 public:
     PluginTemplateAudioProcessorEditor (PluginTemplateAudioProcessor&);
@@ -26,6 +27,7 @@ public:
     void resized() override;
     
     void buttonClicked(Button* button) override;
+    void timerCallback() override;
 
 private:
     // This reference is provided as a quick way for your editor to

@@ -51,13 +51,15 @@ PluginTemplateAudioProcessorEditor::PluginTemplateAudioProcessorEditor (PluginTe
     
     LookAndFeel::setDefaultLookAndFeel(&theLFDark);
    
+    Timer::startTimerHz(30.0);
     
     setSize (400, 300);
 }
 
 PluginTemplateAudioProcessorEditor::~PluginTemplateAudioProcessorEditor()
 {
-    LookAndFeel::setDefaultLookAndFeel(nullptr); 
+    LookAndFeel::setDefaultLookAndFeel(nullptr);
+    Timer::stopTimer();
 }
 
 //==============================================================================
@@ -76,12 +78,26 @@ void PluginTemplateAudioProcessorEditor::paint (juce::Graphics& g)
     g.setColour(Colours::white);
     g.setFont(Font(20.0).italicised().withExtraKerningFactor(0.1f));
     g.drawFittedText ("DSP Lesson 1", textBounds, Justification::centredLeft, 1);
+    
+    auto dbValue = Decibels::gainToDecibels(processor.meterGlobalMaxVal.load(), -100.0f );
+    dbValue = jlimit(-100.0f,0.0f,dbValue);
+    
+    auto meter = bounds.removeFromRight(40);
+    meter.reduce(10,10);
+    
+    g.setColour(Colours::black.withAlpha(0.5f));
+    g.fillRect(meter);
+    
+    meter.removeFromTop(meter.getHeight() * -dbValue/100.0f);
+    g.setColour(Colours::green.brighter());
+    g.fillRect(meter);
 }
 
 void PluginTemplateAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds();
     auto recTop = bounds.removeFromTop(40);
+    bounds.removeFromRight(40);
     bounds.reduce(40, 40);
     
     recTop.reduce(10, 0);
@@ -144,4 +160,9 @@ void PluginTemplateAudioProcessorEditor::buttonClicked(Button* button)
         
         
     }
+}
+
+void PluginTemplateAudioProcessorEditor::timerCallback()
+{
+    repaint(); 
 }

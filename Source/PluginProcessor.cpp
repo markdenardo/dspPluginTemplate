@@ -151,7 +151,7 @@ void PluginTemplateAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     auto numChannels = jmin(totalNumInputChannels, totalNumOutputChannels);
 
     auto sumMaxVal = 0.0f;
-    auto currentmaxVal = meterGlobalMaxVal.load();
+    auto currentMaxVal = meterGlobalMaxVal.load();
     
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, numSamples);
@@ -162,9 +162,11 @@ void PluginTemplateAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
+        
         auto channelMaxVal = 0.0f;
             
         iirFilter[channel].processSamples(channelData, numSamples);
+        
         outputVolume[channel].applyGain(channelData,numSamples);
         
         //absolute value of all samples in a buffer
@@ -178,13 +180,13 @@ void PluginTemplateAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
             if (channelMaxVal < rectifiedVal)
                 channelMaxVal = rectifiedVal;
             
-            if (currentmaxVal< rectifiedVal)
-                currentmaxVal=rectifiedVal;
+            if (currentMaxVal< rectifiedVal)
+                currentMaxVal=rectifiedVal;
         }
         
-        sumMaxVal += channelMaxVal;//sum of ch 0 and  ch 1  max vals
+            sumMaxVal += channelMaxVal;//sum of ch 0 and  ch 1  max vals
         
-        meterGlobalMaxVal.store(currentmaxVal);
+            meterGlobalMaxVal.store(currentMaxVal);
 //        ignoreUnused(channelData);
         
         
@@ -269,7 +271,7 @@ void PluginTemplateAudioProcessor::reset()
         
     {
         iirFilter[channel].reset();
-        outputVolume[channel].reset(getSampleRate(), 0.50);
+        outputVolume[channel].reset(getSampleRate(), 0.050);
     }
     
     meterLocalMaxVal.store(0.0f);

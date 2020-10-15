@@ -25,6 +25,7 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+    void mouseDown (const MouseEvent& e) override;
     
     void buttonClicked(Button* button) override;
     void timerCallback() override;
@@ -41,7 +42,7 @@ private:
     LookAndFeel_V4 theLFDark, theLFMid, theLFGrey, theLFLight;
     LookAndFeel_V3 theLFV3;
     LookAndFeel_V2 theLFV2;
-    int currentLF = 1;
+    int currentLF = { 1 };
     
      
     PluginTemplateAudioProcessor& processor;

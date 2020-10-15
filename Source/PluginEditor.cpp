@@ -14,8 +14,6 @@ PluginTemplateAudioProcessorEditor::PluginTemplateAudioProcessorEditor (PluginTe
     : AudioProcessorEditor (&p), processor(p)
 {
     
-    
-    
     volumeSlider = std::make_unique<Slider>(Slider::SliderStyle::RotaryVerticalDrag, Slider::TextBoxBelow);
     //other way to do this ...
     //  volumeSlider.reset(new Slider(Slider::SliderStyle::RotaryVerticalDrag, Slider::TextBoxBelow));
@@ -51,8 +49,7 @@ PluginTemplateAudioProcessorEditor::PluginTemplateAudioProcessorEditor (PluginTe
     
     LookAndFeel::setDefaultLookAndFeel(&theLFDark);
    
-    Timer::startTimerHz(30.0);
-    
+    Timer::startTimerHz(20);
     setSize (400, 300);
 }
 
@@ -76,12 +73,12 @@ void PluginTemplateAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillRect(textBounds);
     
     g.setColour(Colours::white);
-    g.setFont(Font(20.0).italicised().withExtraKerningFactor(0.1f));
+    g.setFont(Font(20.0f).italicised().withExtraKerningFactor(0.1f));
     g.drawFittedText ("DSP Lesson 1", textBounds, Justification::centredLeft, 1);
     
-    auto dbValue = Decibels::gainToDecibels(processor.meterGlobalMaxVal.load(), -100.0f );
-    dbValue = jlimit(-100.0f,0.0f,dbValue);
-    
+    auto dbValue = Decibels::gainToDecibels (processor.meterGlobalMaxVal.load(), -100.0f );
+    dbValue = jlimit(-100.0f, 0.0f , dbValue);
+        
     auto meter = bounds.removeFromRight(40);
     meter.reduce(10,10);
     
@@ -166,3 +163,15 @@ void PluginTemplateAudioProcessorEditor::timerCallback()
 {
     repaint(); 
 }
+
+void PluginTemplateAudioProcessorEditor::mouseDown (const MouseEvent& e)
+{
+    // Find the area where our meter is located
+    auto bounds = getLocalBounds();
+    auto textBounds = bounds.removeFromTop (40);
+    auto meter = bounds.removeFromRight (40);
+    
+    if (meter.contains (e.getMouseDownPosition()))
+        processor.meterGlobalMaxVal.store (0.0f);
+}
+
